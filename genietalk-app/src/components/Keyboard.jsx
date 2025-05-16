@@ -80,7 +80,16 @@ const Keyboard = ({
     return (
       <div className="key-prediction-container">
         {utterances.length > 0 && utterances.map((utterance, utteranceIndex) => (
-          <div key={`utterance-${rowIndex}-${colIndex}-${utteranceIndex}`} className="utterance-prediction-container">
+          <div
+            key={`utterance-${rowIndex}-${colIndex}-${utteranceIndex}`}
+            className="utterance-prediction-container"
+            style={{
+              // Position the container relative to its parent
+              left: '0', // Start at the left edge of the key
+              bottom: `${28 + utteranceIndex * 28}px`, // Position above the key with spacing for multiple predictions
+              transform: 'translateX(-25%)' // Shift left to center better
+            }}
+          >
             {utterance.split(' ').map((word, wordIndex) => (
               <button
                 key={`utterance-${rowIndex}-${colIndex}-${utteranceIndex}-word-${wordIndex}`}
