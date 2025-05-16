@@ -61,22 +61,18 @@ const Keyboard = ({
     );
   };
 
-  // Render utterance predictions for a row
-  const renderUtterancePredictions = (rowIndex) => {
-    // Get utterance predictions for this row
-    const utterances = utterancePredictionMap[rowIndex] || [];
-
-    if (utterances.length === 0) {
-      return null;
-    }
+  // Render utterance predictions for a specific key position
+  const renderUtterancePrediction = (rowIndex, colIndex) => {
+    const key = `${rowIndex}-${colIndex}`;
+    const utterances = utterancePredictionMap[key] || [];
 
     return (
-      <div className="utterance-predictions-row">
-        {utterances.map((utterance, utteranceIndex) => (
-          <div key={`utterance-row-${rowIndex}-${utteranceIndex}`} className="utterance-prediction-container">
+      <div className="key-prediction-container">
+        {utterances.length > 0 && utterances.map((utterance, utteranceIndex) => (
+          <div key={`utterance-${rowIndex}-${colIndex}-${utteranceIndex}`} className="utterance-prediction-container">
             {utterance.split(' ').map((word, wordIndex) => (
               <button
-                key={`utterance-row-${rowIndex}-${utteranceIndex}-word-${wordIndex}`}
+                key={`utterance-${rowIndex}-${colIndex}-${utteranceIndex}-word-${wordIndex}`}
                 className="prediction utterance-prediction"
                 onClick={() => onUtteranceSelect(utterance, wordIndex)}
               >
@@ -93,7 +89,7 @@ const Keyboard = ({
     <div className="keyboard-container">
       <div className="keyboard-layout">
         <div className="keyboard-main">
-          {/* First row with word predictions */}
+          {/* First row with word and utterance predictions */}
           <div className="row-container">
             <div className="prediction-row">
               {keyboardLayout[0].map((key, colIndex) => (
@@ -102,6 +98,7 @@ const Keyboard = ({
                   className="key-prediction-slot"
                 >
                   {renderWordPrediction(0, colIndex)}
+                  {renderUtterancePrediction(0, colIndex)}
                 </div>
               ))}
             </div>
@@ -111,10 +108,7 @@ const Keyboard = ({
             />
           </div>
 
-          {/* Utterance predictions after first row */}
-          {renderUtterancePredictions(0)}
-
-          {/* Second row with word predictions */}
+          {/* Second row with word and utterance predictions */}
           <div className="row-container">
             <div className="prediction-row">
               {keyboardLayout[1].map((key, colIndex) => (
@@ -123,6 +117,7 @@ const Keyboard = ({
                   className="key-prediction-slot"
                 >
                   {renderWordPrediction(1, colIndex)}
+                  {renderUtterancePrediction(1, colIndex)}
                 </div>
               ))}
             </div>
@@ -132,10 +127,7 @@ const Keyboard = ({
             />
           </div>
 
-          {/* Utterance predictions after second row */}
-          {renderUtterancePredictions(1)}
-
-          {/* Third row with word predictions */}
+          {/* Third row with word and utterance predictions */}
           <div className="row-container">
             <div className="prediction-row">
               {keyboardLayout[2].map((key, colIndex) => (
@@ -144,6 +136,7 @@ const Keyboard = ({
                   className="key-prediction-slot"
                 >
                   {renderWordPrediction(2, colIndex)}
+                  {renderUtterancePrediction(2, colIndex)}
                 </div>
               ))}
             </div>
@@ -152,9 +145,6 @@ const Keyboard = ({
               onKeyPress={onKeyPress}
             />
           </div>
-
-          {/* Utterance predictions after third row */}
-          {renderUtterancePredictions(2)}
 
           <div className="spacebar-row">
             <button

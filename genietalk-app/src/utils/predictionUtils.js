@@ -1,47 +1,24 @@
-// Mock data for word predictions
-const commonWords = [
-  'the', 'and', 'to', 'a', 'in', 'for', 'is', 'on', 'that', 'by',
-  'this', 'with', 'i', 'you', 'it', 'not', 'or', 'be', 'are', 'from',
-  'at', 'as', 'your', 'all', 'have', 'new', 'more', 'an', 'was', 'we',
-  'will', 'home', 'can', 'us', 'about', 'if', 'page', 'my', 'has', 'search',
-  'free', 'but', 'our', 'one', 'other', 'do', 'no', 'information', 'time', 'they',
-  'site', 'he', 'up', 'may', 'what', 'which', 'their', 'news', 'out', 'use',
-  'any', 'there', 'see', 'only', 'so', 'his', 'when', 'contact', 'here', 'business',
-  'who', 'web', 'also', 'now', 'help', 'get', 'pm', 'view', 'online', 'first',
-  'am', 'been', 'would', 'how', 'were', 'me', 'some', 'these', 'its', 'like',
-  'said', 'she', 'could', 'people', 'my', 'over', 'than', 'date', 'has', 'just'
-];
+// Import the PPM model initializer and functions
+import {
+  initializeModel,
+  addUtteranceToModel,
+  generateWordPredictionsWithBackoff,
+  generateUtterancePredictionsWithBackoff
+} from '../models/modelInitializer';
 
-// Mock data for sentence predictions
-const commonUtterances = [
-  'I went home last night in a taxi',
-  'How are you doing today',
-  'I need to go to the store',
-  'Can you help me with this',
-  'What time is the meeting',
-  'I would like to order a coffee',
-  'Thank you for your help',
-  'It was nice to meet you',
-  'I will be there in a few minutes',
-  'Could you please repeat that',
-  'I am not feeling well today',
-  'What do you think about this',
-  'I need to make a phone call',
-  'Can we talk about this later',
-  'I am looking forward to seeing you',
-  'Do you have any questions',
-  'I am sorry for the inconvenience',
-  'Could you please help me with this',
-  'I would like to schedule an appointment',
-  'What are your plans for the weekend'
-];
+// Initialize the PPM model when this module is loaded
+initializeModel();
 
 // Store utterance history
-let utteranceHistory = [...commonUtterances];
+let utteranceHistory = [];
 
-// Function to add an utterance to history
+// Function to add an utterance to history and update the model
 export const addUtterance = (utterance) => {
+  // Add to local history
   utteranceHistory.unshift(utterance);
+
+  // Also update the PPM model
+  addUtteranceToModel(utterance);
 };
 
 // Map of letters to their position in the keyboard layout
@@ -67,25 +44,25 @@ export const generateWordPredictions = (text, currentWord) => {
   // Initialize an empty map for predictions
   const predictionMap = {};
 
-  // Check if the input matches "hello how are a" to match the screenshot
+  // For backward compatibility with screenshots
   if (text && text.toLowerCase().includes('hello how are a')) {
     // Specific predictions for the screenshot
     predictionMap['0-0'] = ['are']; // Above 'q'
     predictionMap['0-1'] = ['at']; // Above 'w'
-
     predictionMap['1-8'] = ['all']; // Above 'l'
     predictionMap['1-7'] = ['also']; // Above 'k'
-
     predictionMap['2-5'] = ['about']; // Above 'n'
     predictionMap['2-6'] = ['and']; // Above 'm'
     predictionMap['2-7'] = ['am']; // Above '.'
     predictionMap['2-4'] = ['an']; // Above 'b'
-
     return predictionMap;
   }
 
-  if (!currentWord) {
-    // If no current word, return common starting words positioned above their first letter
+  // Get predictions from the PPM model with backoff strategy
+  const predictions = generateWordPredictionsWithBackoff(text, currentWord, 10);
+
+  if (!predictions || predictions.length === 0) {
+    // Fallback to basic predictions if the model returns nothing
     const startingWords = ['I', 'The', 'A', 'In', 'To'];
 
     startingWords.forEach(word => {
@@ -102,54 +79,63 @@ export const generateWordPredictions = (text, currentWord) => {
     return predictionMap;
   }
 
-  const lowerCurrentWord = currentWord.toLowerCase();
+  // Position each predicted word above the key that would be pressed next
+  predictions.forEach(word => {
+    // Determine which key the prediction should appear above
+    let position;
 
-  // Filter words that start with the current input
-  const matchingWords = commonWords
-    .filter(word => word.startsWith(lowerCurrentWord) && word !== lowerCurrentWord)
-    .slice(0, 10);
+    if (!currentWord) {
+      // If no current word, position above the first letter of the predicted word
+      const firstLetter = word.charAt(0).toLowerCase();
+      position = findLetterPosition(firstLetter);
+    } else {
+      // Find the next letter that would be typed
+      const nextLetterIndex = currentWord.length;
+      if (nextLetterIndex < word.length) {
+        const nextLetter = word.charAt(nextLetterIndex);
+        position = findLetterPosition(nextLetter);
+      } else {
+        // If we're at the end of the word, use the first letter
+        const firstLetter = word.charAt(0).toLowerCase();
+        position = findLetterPosition(firstLetter);
+      }
+    }
 
-  // Position each word above the key that would be pressed next
-  matchingWords.forEach(word => {
-    // Find the next letter that would be typed
-    const nextLetterIndex = currentWord.length;
-    if (nextLetterIndex < word.length) {
-      const nextLetter = word.charAt(nextLetterIndex);
-      const position = findLetterPosition(nextLetter);
+    if (position) {
+      const key = `${position.row}-${position.col}`;
+      if (!predictionMap[key]) {
+        predictionMap[key] = [];
+      }
 
-      if (position) {
-        const key = `${position.row}-${position.col}`;
-        if (!predictionMap[key]) {
-          predictionMap[key] = [];
-        }
-
-        // Only add if we don't already have too many predictions at this position
-        if (predictionMap[key].length < 2) {
-          predictionMap[key].push(word);
-        }
+      // Only add if we don't already have too many predictions at this position
+      if (predictionMap[key].length < 2) {
+        predictionMap[key].push(word);
       }
     }
   });
 
-  // If we have fewer than 5 total predictions, add some common next words
+  // If we have fewer than 5 total predictions, distribute them more evenly
   const totalPredictions = Object.values(predictionMap).flat().length;
-  if (totalPredictions < 5) {
-    const additionalWords = commonWords
-      .filter(word => !matchingWords.includes(word) && word !== lowerCurrentWord)
-      .slice(0, 5 - totalPredictions);
+  if (totalPredictions < 5 && predictions.length > 0) {
+    // Try to add more predictions to empty slots
+    const remainingPredictions = predictions.filter(word =>
+      !Object.values(predictionMap).flat().includes(word)
+    );
 
-    additionalWords.forEach(word => {
-      const firstLetter = word.charAt(0).toLowerCase();
-      const position = findLetterPosition(firstLetter);
-
-      if (position) {
-        const key = `${position.row}-${position.col}`;
-        if (!predictionMap[key]) {
-          predictionMap[key] = [];
-        }
-
-        if (predictionMap[key].length < 2) {
-          predictionMap[key].push(word);
+    remainingPredictions.forEach(word => {
+      // Find an empty or less populated position
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < (row === 0 ? 10 : (row === 1 ? 9 : 9)); col++) {
+          const key = `${row}-${col}`;
+          if (!predictionMap[key] || predictionMap[key].length < 1) {
+            if (!predictionMap[key]) {
+              predictionMap[key] = [];
+            }
+            predictionMap[key].push(word);
+            // Break out of both loops
+            row = 3;
+            break;
+          }
         }
       }
     });
@@ -160,68 +146,66 @@ export const generateWordPredictions = (text, currentWord) => {
 
 // Function to generate utterance predictions based on current input
 export const generateUtterancePredictions = (text) => {
-  // Always show some utterance predictions, even if there's no text
+  // Initialize an empty map for predictions
   const predictionMap = {};
 
-  // Check if the input matches "hello how are a" to match the screenshot
-  if (text && text.toLowerCase().includes('hello how are a')) {
-    // First row utterances (row 0)
-    const firstRowUtterances = [
-      'you',
-      'a'
-    ];
-
-    // Add these as individual words to the first row
-    predictionMap['0'] = [firstRowUtterances.join(' ')];
-
-    // Second row utterances (row 1)
-    const secondRowUtterances = [
-      'all',
-      'all ready now'
-    ];
-
-    // Add these to the second row
-    predictionMap['1'] = secondRowUtterances;
-
-    // Third row utterances (row 2)
-    const thirdRowUtterances = [
-      'and am asking how you are'
-    ];
-
-    // Add these to the third row
-    predictionMap['2'] = thirdRowUtterances;
-
+  // For backward compatibility with screenshots
+  if (text && text.toLowerCase().includes('hello how are')) {
+    // Map utterances to specific key positions in each row
+    // Format: 'rowIndex-colIndex': ['utterance1', 'utterance2']
+    predictionMap['0-0'] = ['I am']; // Above 'q'
+    predictionMap['0-4'] = ['to']; // Above 't'
+    predictionMap['0-7'] = ['help']; // Above 'i'
+    predictionMap['1-0'] = ['and']; // Above 'a'
+    predictionMap['1-4'] = ['a']; // Above 'g'
+    predictionMap['2-0'] = ['Thank you']; // Above 'z'
+    predictionMap['2-2'] = ['How are you']; // Above 'c'
     return predictionMap;
   }
 
-  // Default predictions if text doesn't match the specific case
+  // Get predictions from the PPM model with backoff strategy
+  const predictions = generateUtterancePredictionsWithBackoff(text, 6);
 
-  // First row utterances (row 0)
-  const firstRowUtterances = [
-    'I am',
-    'I need to'
+  if (!predictions || predictions.length === 0) {
+    // Fallback to basic predictions if the model returns nothing
+    predictionMap['0-0'] = ['I am']; // Above 'q'
+    predictionMap['0-2'] = ['I need to']; // Above 'e'
+    predictionMap['1-0'] = ['Thank you']; // Above 'a'
+    predictionMap['1-3'] = ['How are you']; // Above 'f'
+    predictionMap['2-0'] = ['Can you help me']; // Above 'z'
+    predictionMap['2-4'] = ['What time is it']; // Above 'b'
+    return predictionMap;
+  }
+
+  // Distribute predictions across the keyboard in a more balanced way
+  const keyPositions = [
+    ['0-0', '0-2', '0-4', '0-7'], // First row positions
+    ['1-0', '1-3', '1-5', '1-7'], // Second row positions
+    ['2-0', '2-2', '2-4', '2-6']  // Third row positions
   ];
 
-  // Add these to the first row
-  predictionMap['0'] = firstRowUtterances;
+  // Flatten the positions array for easier access
+  const flatPositions = keyPositions.flat();
 
-  // Second row utterances (row 1)
-  const secondRowUtterances = [
-    'Thank you',
-    'How are you'
-  ];
+  // Distribute predictions across available positions
+  predictions.forEach((utterance, index) => {
+    if (index < flatPositions.length) {
+      const position = flatPositions[index];
+      predictionMap[position] = [utterance];
+    }
+  });
 
-  // Add these to the second row
-  predictionMap['1'] = secondRowUtterances;
+  // If we have fewer than 6 predictions, ensure we have at least one per row
+  const rowCounts = [0, 0, 0];
+  Object.keys(predictionMap).forEach(key => {
+    const row = parseInt(key.split('-')[0]);
+    rowCounts[row]++;
+  });
 
-  // Third row utterances (row 2)
-  const thirdRowUtterances = [
-    'Can you help me',
-    'What time is it'
-  ];
-
-  // Add these to the third row
-  predictionMap['2'] = thirdRowUtterances;
+  // Add default predictions to empty rows
+  if (rowCounts[0] === 0) predictionMap['0-0'] = ['I am'];
+  if (rowCounts[1] === 0) predictionMap['1-0'] = ['Thank you'];
+  if (rowCounts[2] === 0) predictionMap['2-0'] = ['Can you help me'];
 
   return predictionMap;
 };

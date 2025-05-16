@@ -2,12 +2,32 @@ import React, { useState, useEffect } from 'react';
 import Keyboard from './components/Keyboard';
 import UtteranceBar from './components/UtteranceBar';
 import { addUtterance } from './utils/predictionUtils';
+import { initializeModel, saveModelState, loadModelState } from './models/modelInitializer';
 import './styles/App.css';
 
 function App() {
-  const [text, setText] = useState('hello how are a');
-  const [cursorPosition, setCursorPosition] = useState(14);
+  const [text, setText] = useState('');
+  const [cursorPosition, setCursorPosition] = useState(0);
   const [utteranceHistory, setUtteranceHistory] = useState([]);
+
+  // Initialize the PPM model when the app loads
+  useEffect(() => {
+    console.log('Initializing PPM model in App component...');
+
+    // Try to load saved model state first
+    const modelLoaded = loadModelState();
+
+    // If no saved state, initialize with default training data
+    if (!modelLoaded) {
+      initializeModel();
+    }
+
+    // Save model state when the component unmounts
+    return () => {
+      console.log('Saving PPM model state...');
+      saveModelState();
+    };
+  }, []);
 
   const handleKeyPress = (key) => {
     const newText = text.slice(0, cursorPosition) + key + text.slice(cursorPosition);
@@ -72,8 +92,11 @@ function App() {
 
   const handleSpeak = () => {
     if (text.trim()) {
-      // Add the utterance to our history
+      // Add the utterance to our history and update the PPM model
       addUtterance(text);
+
+      // Update local state
+      setUtteranceHistory(prevHistory => [text, ...prevHistory]);
 
       // In a real implementation, this would trigger speech synthesis
       // For example:
@@ -81,10 +104,14 @@ function App() {
       // window.speechSynthesis.speak(speech);
 
       console.log('Speaking:', text);
+      console.log('Added to PPM model for future predictions');
 
       // Clear the text field
       setText('');
       setCursorPosition(0);
+
+      // Save model state after adding a new utterance
+      saveModelState();
     }
   };
 
