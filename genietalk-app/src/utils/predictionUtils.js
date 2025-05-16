@@ -1,12 +1,13 @@
-// Import the PPM model initializer and functions
+// Import the model initializer and functions
 import {
   initializeModel,
   addUtteranceToModel,
   generateWordPredictionsWithBackoff,
   generateUtterancePredictionsWithBackoff
 } from '../models/modelInitializer';
+import { usePPMModel, useImaginvilleAPI } from '../config/appConfig';
 
-// Initialize the PPM model when this module is loaded
+// Initialize the appropriate model when this module is loaded
 initializeModel();
 
 // Store utterance history
@@ -40,7 +41,7 @@ const findLetterPosition = (letter) => {
 };
 
 // Function to generate word predictions based on current input
-export const generateWordPredictions = (text, currentWord) => {
+export const generateWordPredictions = async (text, currentWord) => {
   // Initialize an empty map for predictions
   const predictionMap = {};
 
@@ -58,8 +59,8 @@ export const generateWordPredictions = (text, currentWord) => {
     return predictionMap;
   }
 
-  // Get predictions from the PPM model with backoff strategy
-  const predictions = generateWordPredictionsWithBackoff(text, currentWord, 10);
+  // Get predictions from the model with backoff strategy
+  const predictions = await generateWordPredictionsWithBackoff(text, currentWord, 10);
 
   if (!predictions || predictions.length === 0) {
     // Fallback to basic predictions if the model returns nothing
@@ -145,7 +146,7 @@ export const generateWordPredictions = (text, currentWord) => {
 };
 
 // Function to generate utterance predictions based on current input
-export const generateUtterancePredictions = (text) => {
+export const generateUtterancePredictions = async (text) => {
   // Initialize an empty map for predictions
   const predictionMap = {};
 
@@ -163,8 +164,8 @@ export const generateUtterancePredictions = (text) => {
     return predictionMap;
   }
 
-  // Get predictions from the PPM model with backoff strategy
-  const predictions = generateUtterancePredictionsWithBackoff(text, 6);
+  // Get predictions from the model with backoff strategy
+  const predictions = await generateUtterancePredictionsWithBackoff(text, 6);
 
   if (!predictions || predictions.length === 0) {
     // Fallback to basic predictions if the model returns nothing

@@ -27,17 +27,28 @@ const Keyboard = ({
 
   // Update predictions when text changes
   useEffect(() => {
-    const textBeforeCursor = currentText.slice(0, cursorPosition);
-    const words = textBeforeCursor.split(' ');
-    const currentWord = words[words.length - 1] || '';
+    const updatePredictions = async () => {
+      const textBeforeCursor = currentText.slice(0, cursorPosition);
+      const words = textBeforeCursor.split(' ');
+      const currentWord = words[words.length - 1] || '';
 
-    // Generate word predictions
-    const wordMap = generateWordPredictions(textBeforeCursor, currentWord);
-    setWordPredictionMap(wordMap);
+      try {
+        // Generate word predictions (async)
+        const wordMap = await generateWordPredictions(textBeforeCursor, currentWord);
+        setWordPredictionMap(wordMap);
 
-    // Generate utterance predictions
-    const utteranceMap = generateUtterancePredictions(textBeforeCursor);
-    setUtterancePredictionMap(utteranceMap);
+        // Generate utterance predictions (async)
+        const utteranceMap = await generateUtterancePredictions(textBeforeCursor);
+        setUtterancePredictionMap(utteranceMap);
+      } catch (error) {
+        console.error('Error updating predictions:', error);
+        // Set empty predictions on error
+        setWordPredictionMap({});
+        setUtterancePredictionMap({});
+      }
+    };
+
+    updatePredictions();
   }, [currentText, cursorPosition]);
 
   // Render a word prediction above a key
