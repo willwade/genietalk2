@@ -1,0 +1,119 @@
+.keyboard-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.keyboard-layout {
+  display: flex;
+  gap: 10px;
+}
+
+.keyboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.prediction-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--key-spacing);
+  min-height: 40px;
+}
+
+.key-prediction-slot {
+  width: var(--key-size);
+  display: flex;
+  justify-content: center;
+}
+
+.key-prediction-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.prediction {
+  padding: 2px 5px;
+  border-radius: var(--border-radius);
+  font-size: var(--prediction-font-size);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 24px;
+  min-width: 30px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.word-prediction {
+  background-color: var(--word-prediction-bg);
+  color: var(--key-text);
+  border: 1px solid #e6d435;
+  z-index: 5;
+}
+
+.utterance-predictions-row {
+  display: flex;
+  justify-content: flex-start;
+  margin: 2px 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  height: 28px;
+  width: 100%;
+}
+
+.utterance-predictions-row::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+.utterance-prediction-container {
+  display: flex;
+  gap: 4px;
+  margin: 0 5px;
+}
+
+.utterance-prediction {
+  background-color: var(--sentence-prediction-bg);
+  color: var(--key-text);
+  border: 1px solid #45a049;
+  flex-shrink: 0;
+  height: 24px;
+  padding: 2px 8px;
+  font-size: var(--prediction-font-size);
+}
+
+.spacebar-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.spacebar {
+  width: 50%;
+  height: var(--key-size);
+  background-color: var(--key-bg);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  cursor: pointer;
+}

@@ -1,0 +1,33 @@
+.utterance-container {
+  position: relative;
+  width: 100%;
+  min-height: 44px;
+  background-color: var(--utterance-bg);
+  border: 1px solid var(--utterance-border);
+  border-radius: var(--border-radius);
+  padding: 10px;
+  font-size: 16px;
+  overflow-x: auto;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.utterance-bar {
+  outline: none;
+  min-height: 24px;
+}
+
+.utterance-cursor {
+  position: absolute;
+  top: 10px;
+  width: 2px;
+  height: 24px;
+  background-color: #000;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
