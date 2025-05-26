@@ -33,7 +33,7 @@
   display: flex;
   justify-content: center;
   gap: var(--key-spacing);
-  height: 84px; /* Fixed height for 3 lines of predictions */
+  height: 140px; /* Increased height for 5 lines of predictions (28px each) */
   position: relative; /* Allow absolute positioning of children */
   overflow: visible; /* Allow predictions to extend beyond row boundaries */
   z-index: 5; /* Ensure proper stacking context */
@@ -41,7 +41,7 @@
 
 .key-prediction-slot {
   width: var(--key-size);
-  height: 84px; /* Fixed height for 3 lines of predictions (28px each) */
+  height: 140px; /* Increased height for 5 lines of predictions (28px each) */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -64,11 +64,12 @@
   max-height: 28px; /* Space for one line of word predictions */
   overflow: visible; /* Allow content to extend beyond boundaries */
   z-index: 20; /* Higher than utterance predictions so they appear on top */
+  transform: translateY(-56px); /* Default position - move to bottom row (row 5) */
 }
 
-/* When sentence predictions are present, move word predictions up */
+/* When sentence predictions are present, move word predictions up further */
 .row-container.has-sentence-predictions .key-prediction-container {
-  transform: translateY(-28px); /* Move word predictions up to make room for sentence predictions */
+  transform: translateY(-84px); /* Move word predictions up to make room for 3 layers of sentence predictions */
 }
 
 .prediction {
@@ -127,13 +128,27 @@
 /* Positioned utterance predictions that start above their first letter */
 .positioned-utterance-predictions {
   position: absolute;
-  top: 56px; /* Position in the gap between word predictions and keyboard keys */
   left: 0; /* Align with the start of the prediction row */
   right: 0; /* Full width of the prediction row */
   height: 28px; /* Fixed height for utterance predictions */
   overflow: visible;
   z-index: 10; /* Lower than word predictions so they appear underneath */
   pointer-events: none; /* Allow clicks to pass through to underlying elements */
+}
+
+/* Layer 1 - closest to keyboard keys */
+.positioned-utterance-predictions.layer-1 {
+  top: 112px; /* Bottom layer */
+}
+
+/* Layer 2 - middle layer */
+.positioned-utterance-predictions.layer-2 {
+  top: 84px; /* Middle layer */
+}
+
+/* Layer 3 - top layer */
+.positioned-utterance-predictions.layer-3 {
+  top: 56px; /* Top layer */
 }
 
 .positioned-utterance-container {

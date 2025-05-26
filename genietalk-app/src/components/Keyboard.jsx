@@ -86,26 +86,27 @@ const Keyboard = ({
 
   // Render utterance predictions positioned above their starting letters
   const renderPositionedUtterancePredictions = (rowIndex) => {
-    const predictions = [];
+    const allPredictions = [];
 
-    // Collect utterances for this row with their positions
+    // Collect all utterances for this row with their positions
     for (let colIndex = 0; colIndex < keyboardLayout[rowIndex].length; colIndex++) {
       const key = `${rowIndex}-${colIndex}`;
       const utterances = utterancePredictionMap[key] || [];
 
-      if (utterances.length > 0) {
-        // Only take the first (highest ranked) utterance for this position
-        const utterance = utterances[0];
-
-        predictions.push({
+      utterances.forEach((utterance, utteranceIndex) => {
+        allPredictions.push({
           utterance,
           colIndex,
-          key: `positioned-utterance-${rowIndex}-${colIndex}`
+          key: `positioned-utterance-${rowIndex}-${colIndex}-${utteranceIndex}`,
+          priority: utteranceIndex // 0 = highest priority
         });
-      }
+      });
     }
 
-    if (predictions.length === 0) return null;
+    if (allPredictions.length === 0) return null;
+
+    // Sort by priority (highest priority first)
+    allPredictions.sort((a, b) => a.priority - b.priority);
 
     // Calculate the total width of the keyboard row to center properly
     const keySize = 50; // --key-size
@@ -114,31 +115,73 @@ const Keyboard = ({
     const totalKeysWidth = (numKeys * keySize) + ((numKeys - 1) * keySpacing);
 
     // Calculate the starting offset to center the row
-    const containerWidth = 100; // This will be calculated as percentage
     const startOffset = `calc(50% - ${totalKeysWidth / 2}px)`;
 
+    // Group predictions into layers (max 3 layers)
+    const layers = [[], [], []]; // layer 1, 2, 3
+    const usedPositions = [new Set(), new Set(), new Set()]; // Track used positions per layer
+
+    allPredictions.forEach((prediction) => {
+      // Try to place in the first available layer, starting from layer 1 (closest to keys)
+      for (let layerIndex = 0; layerIndex < 3; layerIndex++) {
+        // Create a position key that includes multiple columns for multi-word predictions
+        const utteranceWords = prediction.utterance.split(' ');
+        const neededColumns = utteranceWords.length;
+
+        // Check if we have enough consecutive free columns in this layer
+        let canPlace = true;
+        for (let i = 0; i < neededColumns; i++) {
+          const checkCol = prediction.colIndex + i;
+          if (checkCol >= keyboardLayout[rowIndex].length || usedPositions[layerIndex].has(`${checkCol}`)) {
+            canPlace = false;
+            break;
+          }
+        }
+
+        if (canPlace) {
+          layers[layerIndex].push(prediction);
+          // Mark all needed columns as used
+          for (let i = 0; i < neededColumns; i++) {
+            const markCol = prediction.colIndex + i;
+            if (markCol < keyboardLayout[rowIndex].length) {
+              usedPositions[layerIndex].add(`${markCol}`);
+            }
+          }
+          break;
+        }
+      }
+    });
+
     return (
-      <div className="positioned-utterance-predictions">
-        {predictions.map(({ utterance, colIndex, key }) => (
-          <div
-            key={key}
-            className="positioned-utterance-container"
-            style={{
-              left: `calc(${startOffset} + ${colIndex * (keySize + keySpacing)}px)`,
-            }}
-          >
-            {utterance.split(' ').map((word, wordIndex) => (
-              <button
-                key={`${key}-word-${wordIndex}`}
-                className="prediction utterance-prediction"
-                onClick={() => onUtteranceSelect(utterance, wordIndex)}
-              >
-                {word}
-              </button>
-            ))}
-          </div>
-        ))}
-      </div>
+      <>
+        {layers.map((layerPredictions, layerIndex) => {
+          if (layerPredictions.length === 0) return null;
+
+          return (
+            <div key={`layer-${layerIndex + 1}`} className={`positioned-utterance-predictions layer-${layerIndex + 1}`}>
+              {layerPredictions.map(({ utterance, colIndex, key }) => (
+                <div
+                  key={key}
+                  className="positioned-utterance-container"
+                  style={{
+                    left: `calc(${startOffset} + ${colIndex * (keySize + keySpacing)}px)`,
+                  }}
+                >
+                  {utterance.split(' ').map((word, wordIndex) => (
+                    <button
+                      key={`${key}-word-${wordIndex}`}
+                      className="prediction utterance-prediction"
+                      onClick={() => onUtteranceSelect(utterance, wordIndex)}
+                    >
+                      {word}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </>
     );
   };
 

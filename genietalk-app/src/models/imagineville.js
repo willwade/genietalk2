@@ -196,7 +196,8 @@ class ImaginvilleClient {
 
     for (const [pattern, options] of Object.entries(completions)) {
       if (input.startsWith(pattern)) {
-        return options.map(completion => `${input} ${completion}`);
+        // Return just the completion part, not the full sentence
+        return options;
       }
     }
 

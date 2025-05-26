@@ -45,19 +45,7 @@ export const generateWordPredictions = async (text, currentWord) => {
   // Initialize an empty map for predictions
   const predictionMap = {};
 
-  // For backward compatibility with screenshots
-  if (text && text.toLowerCase().includes('hello how are a')) {
-    // Specific predictions for the screenshot
-    predictionMap['0-0'] = ['are']; // Above 'q'
-    predictionMap['0-1'] = ['at']; // Above 'w'
-    predictionMap['1-8'] = ['all']; // Above 'l'
-    predictionMap['1-7'] = ['also']; // Above 'k'
-    predictionMap['2-5'] = ['about']; // Above 'n'
-    predictionMap['2-6'] = ['and']; // Above 'm'
-    predictionMap['2-7'] = ['am']; // Above '.'
-    predictionMap['2-4'] = ['an']; // Above 'b'
-    return predictionMap;
-  }
+  // Remove hardcoded mock data - use real predictions only
 
   // Get predictions from the model with backoff strategy
   const predictions = await generateWordPredictionsWithBackoff(text, currentWord, 10);
@@ -150,19 +138,7 @@ export const generateUtterancePredictions = async (text) => {
   // Initialize an empty map for predictions
   const predictionMap = {};
 
-  // For backward compatibility with screenshots
-  if (text && text.toLowerCase().includes('hello how are')) {
-    // Map utterances to specific key positions in each row
-    // Format: 'rowIndex-colIndex': ['utterance1', 'utterance2']
-    predictionMap['0-0'] = ['I am']; // Above 'q'
-    predictionMap['0-4'] = ['to']; // Above 't'
-    predictionMap['0-7'] = ['help']; // Above 'i'
-    predictionMap['1-0'] = ['and']; // Above 'a'
-    predictionMap['1-4'] = ['a']; // Above 'g'
-    predictionMap['2-0'] = ['Thank you']; // Above 'z'
-    predictionMap['2-2'] = ['How are you']; // Above 'c'
-    return predictionMap;
-  }
+  // Remove hardcoded mock data - use real predictions only
 
   // Get predictions from the model with backoff strategy
   const predictions = await generateUtterancePredictionsWithBackoff(text, 8);
