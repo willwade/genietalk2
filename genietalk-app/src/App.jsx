@@ -115,6 +115,11 @@ function App() {
     }
   };
 
+  const handleTextChange = (newText, newCursorPosition) => {
+    setText(newText);
+    setCursorPosition(newCursorPosition);
+  };
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -125,6 +130,7 @@ function App() {
         text={text}
         cursorPosition={cursorPosition}
         setCursorPosition={setCursorPosition}
+        onTextChange={handleTextChange}
       />
       <Keyboard
         onKeyPress={handleKeyPress}
