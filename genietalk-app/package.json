@@ -1,5 +1,5 @@
 {
-  "name": "genietalk-app",
+  "name": "jinniyah-app",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -10,14 +10,14 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "GenieTalk assistive text entry system with word prediction",
+  "description": "Jinniyah assistive text entry system with word prediction",
   "dependencies": {
     "@vitejs/plugin-react": "^4.4.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "vite": "^6.3.5"
   },
-  "genietalkConfig": {
+  "jinniyahConfig": {
     "predictionModel": "api"
   }
 }

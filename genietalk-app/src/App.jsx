@@ -118,7 +118,7 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>GenieTalk</h1>
+        <h1>Jinniyah</h1>
         <p>Assistive Text Entry System</p>
       </header>
       <UtteranceBar

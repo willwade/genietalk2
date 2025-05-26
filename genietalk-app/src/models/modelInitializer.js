@@ -121,13 +121,19 @@ export const generateWordPredictionsWithBackoff = async (currentInput, currentWo
 
 // Function to generate utterance predictions with backoff strategy
 export const generateUtterancePredictionsWithBackoff = async (currentInput, maxPredictions = 3) => {
+  console.log('generateUtterancePredictionsWithBackoff called with:', currentInput);
+
   // Try to get predictions from the model first
   const modelPredictions = await getUtterancePredictionsFromModel(currentInput, maxPredictions);
+  console.log('Model predictions:', modelPredictions);
 
   // If we have predictions from the model, use them
   if (modelPredictions && modelPredictions.length > 0) {
+    console.log('Using model predictions:', modelPredictions);
     return modelPredictions;
   }
+
+  console.log('Falling back to common utterances');
 
   // Otherwise, fall back to a simpler approach
   const commonUtterances = [

@@ -3,7 +3,7 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
-  max-width: 800px;
+  max-width: 1200px; /* Increased from 800px to allow more space for predictions */
   margin: 0 auto;
   padding: 16px;
   gap: 4px;

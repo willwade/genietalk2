@@ -9,9 +9,9 @@
   --function-key-bg: #e0e0e0;
   --function-key-text: #000000;
   --border-radius: 4px;
-  --key-size: 40px;
-  --key-spacing: 5px;
-  --prediction-font-size: 12px;
+  --key-size: 50px;
+  --key-spacing: 8px;
+  --prediction-font-size: 14px;
 }
 
 * {

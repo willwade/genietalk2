@@ -5,6 +5,7 @@
   border-radius: 8px;
   margin: 0;
   padding: 5px 0;
+  overflow: visible; /* Allow predictions to extend beyond keyboard boundaries */
 }
 
 .keyboard-layout {
@@ -17,12 +18,15 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+  overflow: visible; /* Allow predictions to extend beyond main area */
 }
 
 .row-container {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  overflow: visible; /* Allow predictions to extend beyond row container */
+  position: relative; /* Allow absolute positioning of utterance predictions */
 }
 
 .prediction-row {
@@ -31,7 +35,8 @@
   gap: var(--key-spacing);
   height: 84px; /* Fixed height for 3 lines of predictions */
   position: relative; /* Allow absolute positioning of children */
-  /* z-index: 5; */ /* Ensure proper stacking context - Removed as flex order will handle stacking */
+  overflow: visible; /* Allow predictions to extend beyond row boundaries */
+  z-index: 5; /* Ensure proper stacking context */
 }
 
 .key-prediction-slot {
@@ -42,7 +47,8 @@
   align-items: center;
   justify-content: flex-start; /* Align content to top */
   position: relative; /* Allow children to be positioned absolutely */
-  /* Remove overflow: hidden to allow content to extend beyond container */
+  overflow: visible; /* Allow content to extend beyond container boundaries */
+  z-index: 10; /* Ensure predictions appear above other elements */
 }
 
 .key-prediction-container { /* For WORD predictions */
@@ -51,13 +57,13 @@
   align-items: center;
   gap: 2px;
   width: 100%;
-  /* height: 100%; */ /* Let flexbox determine height */
-  /* justify-content: flex-end; */ /* Removed */
   padding-bottom: 2px;
-  position: relative; /* Allow absolute positioning of children - might not be needed if flex handles all */
+  position: relative; /* Allow absolute positioning of children */
   order: 2; /* Words at the bottom */
   margin-top: auto; /* Push to bottom in flex-start container */
   max-height: 28px; /* Space for one line of word predictions */
+  overflow: visible; /* Allow content to extend beyond boundaries */
+  z-index: 20; /* Higher than utterance predictions so they appear on top */
 }
 
 .prediction {
@@ -100,26 +106,6 @@
   display: none; /* Chrome, Safari, Edge */
 }
 
-.utterance-prediction-container {
-  display: flex;
-  gap: 4px;
-  margin: 0 2px;
-  height: auto; /* Let content determine height */
-  max-height: 56px; /* Space for two lines of utterance predictions */
-  align-items: center; /* Center content vertically */
-  /* position: absolute; */ /* Removed */
-  /* z-index: 10; */ /* Removed */
-  white-space: nowrap; /* Keep all words on one line - this might need to be changed to flex-wrap: wrap; if utterances should wrap */
-  order: 1; /* Utterances at the top */
-  width: 100%; /* Take full width of slot */
-  overflow-x: auto; /* If individual utterances are too long, this will allow scroll. */
-  scrollbar-width: none; /* Firefox */
-  justify-content: center; /* Center shorter utterances */
-}
-.utterance-prediction-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
-}
-
 .utterance-prediction {
   background-color: var(--sentence-prediction-bg);
   color: var(--key-text);
@@ -128,9 +114,32 @@
   height: 24px;
   padding: 2px 8px;
   font-size: var(--prediction-font-size);
-  /* z-index: 10; */ /* Removed */
   margin: 0 1px; /* Add small margin between words */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Add shadow for better visibility */
+}
+
+/* Positioned utterance predictions that start above their first letter */
+.positioned-utterance-predictions {
+  position: absolute;
+  top: 58px; /* Position in the gap between word predictions and keyboard keys */
+  left: 0; /* Align with the start of the prediction row */
+  right: 0; /* Full width of the prediction row */
+  height: 28px; /* Fixed height for utterance predictions */
+  overflow: visible;
+  z-index: 15; /* Lower than word predictions so they appear underneath */
+  pointer-events: none; /* Allow clicks to pass through to underlying elements */
+}
+
+.positioned-utterance-container {
+  position: absolute;
+  top: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  z-index: 15; /* Lower than word predictions so they appear underneath */
+  pointer-events: auto; /* Re-enable clicks for the actual predictions */
 }
 
 .spacebar-row {

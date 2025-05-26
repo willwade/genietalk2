@@ -1,9 +1,9 @@
-# GenieTalk Product Requirements Document (PRD)
+# Jinniyah Product Requirements Document (PRD)
 
 ## 1. Introduction
 
 ### 1.1 Purpose
-GenieTalk is an assistive text entry system designed to accelerate communication for users with disabilities by integrating word prediction and utterance retrieval directly into the typing workflow. The system combines a split QWERTY keyboard with contextual word and sentence prediction to help users communicate more efficiently without requiring mode switching between typing and phrase retrieval.
+Jinniyah is an assistive text entry system designed to accelerate communication for users with disabilities by integrating word prediction and utterance retrieval directly into the typing workflow. The system combines a split QWERTY keyboard with contextual word and sentence prediction to help users communicate more efficiently without requiring mode switching between typing and phrase retrieval.
 
 ### 1.2 Target Users
 - Primary: Users with physical disabilities that affect typing speed and efficiency

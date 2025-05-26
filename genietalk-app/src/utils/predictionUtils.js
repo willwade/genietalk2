@@ -124,11 +124,11 @@ export const generateWordPredictions = async (text, currentWord) => {
     );
 
     remainingPredictions.forEach(word => {
-      // Find an empty or less populated position
+      // Find an empty or less populated position (allow up to 2 words per key)
       for (let row = 0; row < 3; row++) {
         for (let col = 0; col < (row === 0 ? 10 : (row === 1 ? 9 : 9)); col++) {
           const key = `${row}-${col}`;
-          if (!predictionMap[key] || predictionMap[key].length < 1) {
+          if (!predictionMap[key] || predictionMap[key].length < 2) {
             if (!predictionMap[key]) {
               predictionMap[key] = [];
             }
@@ -165,48 +165,101 @@ export const generateUtterancePredictions = async (text) => {
   }
 
   // Get predictions from the model with backoff strategy
-  const predictions = await generateUtterancePredictionsWithBackoff(text, 6);
+  const predictions = await generateUtterancePredictionsWithBackoff(text, 8);
 
   if (!predictions || predictions.length === 0) {
     // Fallback to basic predictions if the model returns nothing
-    predictionMap['0-0'] = ['I am']; // Above 'q'
-    predictionMap['0-2'] = ['I need to']; // Above 'e'
-    predictionMap['1-0'] = ['Thank you']; // Above 'a'
-    predictionMap['1-3'] = ['How are you']; // Above 'f'
-    predictionMap['2-0'] = ['Can you help me']; // Above 'z'
-    predictionMap['2-4'] = ['What time is it']; // Above 'b'
+    predictionMap['0-8'] = ['I am']; // Above 'i'
+    predictionMap['0-0'] = ['Thank you']; // Above 'q'
+    predictionMap['1-7'] = ['How are you']; // Above 'k'
+    predictionMap['1-2'] = ['Can you help me']; // Above 'd'
+    predictionMap['2-6'] = ['What time is it']; // Above 'm'
+    predictionMap['2-2'] = ['I need to']; // Above 'c'
     return predictionMap;
   }
 
-  // Distribute predictions across the keyboard in a more balanced way
-  const keyPositions = [
-    ['0-0', '0-2', '0-4', '0-7'], // First row positions
-    ['1-0', '1-3', '1-5', '1-7'], // Second row positions
-    ['2-0', '2-2', '2-4', '2-6']  // Third row positions
-  ];
-
-  // Flatten the positions array for easier access
-  const flatPositions = keyPositions.flat();
-
-  // Distribute predictions across available positions
+  // Position each utterance prediction above the first letter of the sentence
   predictions.forEach((utterance, index) => {
-    if (index < flatPositions.length) {
-      const position = flatPositions[index];
-      predictionMap[position] = [utterance];
+    if (index >= 8) return; // Limit to 8 predictions max
+
+    // Get the first letter of the utterance
+    const firstLetter = utterance.charAt(0).toLowerCase();
+    const position = findLetterPosition(firstLetter);
+
+    if (position) {
+      const key = `${position.row}-${position.col}`;
+
+      // If this position is already taken, try to find an alternative nearby
+      if (predictionMap[key]) {
+        // Try adjacent positions in the same row
+        const row = position.row;
+        const maxCols = row === 0 ? 10 : 9;
+
+        for (let offset = 1; offset < maxCols; offset++) {
+          // Try right first
+          let newCol = position.col + offset;
+          if (newCol < maxCols) {
+            const newKey = `${row}-${newCol}`;
+            if (!predictionMap[newKey]) {
+              predictionMap[newKey] = [utterance];
+              return;
+            }
+          }
+
+          // Then try left
+          newCol = position.col - offset;
+          if (newCol >= 0) {
+            const newKey = `${row}-${newCol}`;
+            if (!predictionMap[newKey]) {
+              predictionMap[newKey] = [utterance];
+              return;
+            }
+          }
+        }
+
+        // If no space in the same row, try other rows
+        for (let rowOffset = 1; rowOffset <= 2; rowOffset++) {
+          for (let direction of [-1, 1]) {
+            const newRow = row + (direction * rowOffset);
+            if (newRow >= 0 && newRow < 3) {
+              const newMaxCols = newRow === 0 ? 10 : 9;
+              if (position.col < newMaxCols) {
+                const newKey = `${newRow}-${position.col}`;
+                if (!predictionMap[newKey]) {
+                  predictionMap[newKey] = [utterance];
+                  return;
+                }
+              }
+            }
+          }
+        }
+      } else {
+        // Position is free, use it
+        predictionMap[key] = [utterance];
+      }
+    } else {
+      // If we can't find the first letter, use fallback positions
+      const fallbackPositions = [
+        '0-0', '0-2', '0-4', '0-6', '0-8', // First row
+        '1-0', '1-2', '1-4', '1-6', '1-8', // Second row
+        '2-0', '2-2', '2-4', '2-6', '2-8'  // Third row
+      ];
+
+      for (const fallbackKey of fallbackPositions) {
+        if (!predictionMap[fallbackKey]) {
+          predictionMap[fallbackKey] = [utterance];
+          break;
+        }
+      }
     }
   });
 
-  // If we have fewer than 6 predictions, ensure we have at least one per row
-  const rowCounts = [0, 0, 0];
-  Object.keys(predictionMap).forEach(key => {
-    const row = parseInt(key.split('-')[0]);
-    rowCounts[row]++;
-  });
-
-  // Add default predictions to empty rows
-  if (rowCounts[0] === 0) predictionMap['0-0'] = ['I am'];
-  if (rowCounts[1] === 0) predictionMap['1-0'] = ['Thank you'];
-  if (rowCounts[2] === 0) predictionMap['2-0'] = ['Can you help me'];
+  // Ensure we have at least some predictions if the above logic didn't work
+  if (Object.keys(predictionMap).length === 0) {
+    predictionMap['0-8'] = ['I am']; // Above 'i'
+    predictionMap['0-0'] = ['Thank you']; // Above 'q'
+    predictionMap['1-7'] = ['How are you']; // Above 'k'
+  }
 
   return predictionMap;
 };
