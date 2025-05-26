@@ -66,6 +66,11 @@
   z-index: 20; /* Higher than utterance predictions so they appear on top */
 }
 
+/* When sentence predictions are present, move word predictions up */
+.row-container.has-sentence-predictions .key-prediction-container {
+  transform: translateY(-28px); /* Move word predictions up to make room for sentence predictions */
+}
+
 .prediction {
   padding: 2px 5px;
   border-radius: var(--border-radius);
@@ -87,7 +92,8 @@
   background-color: var(--word-prediction-bg);
   color: var(--key-text);
   border: 1px solid #e6d435;
-  /* z-index: 5; */ /* Removed */
+  z-index: 25; /* Higher than sentence predictions to appear on top */
+  position: relative; /* Ensure z-index takes effect */
 }
 
 .utterance-predictions-row {
@@ -121,12 +127,12 @@
 /* Positioned utterance predictions that start above their first letter */
 .positioned-utterance-predictions {
   position: absolute;
-  top: 58px; /* Position in the gap between word predictions and keyboard keys */
+  top: 56px; /* Position in the gap between word predictions and keyboard keys */
   left: 0; /* Align with the start of the prediction row */
   right: 0; /* Full width of the prediction row */
   height: 28px; /* Fixed height for utterance predictions */
   overflow: visible;
-  z-index: 15; /* Lower than word predictions so they appear underneath */
+  z-index: 10; /* Lower than word predictions so they appear underneath */
   pointer-events: none; /* Allow clicks to pass through to underlying elements */
 }
 
@@ -138,7 +144,7 @@
   align-items: center;
   flex-wrap: nowrap;
   white-space: nowrap;
-  z-index: 15; /* Lower than word predictions so they appear underneath */
+  z-index: 10; /* Lower than word predictions so they appear underneath */
   pointer-events: auto; /* Re-enable clicks for the actual predictions */
 }
 

@@ -72,6 +72,18 @@ const Keyboard = ({
     );
   };
 
+  // Helper function to check if a row has sentence predictions
+  const hasSentencePredictionsForRow = (rowIndex) => {
+    for (let colIndex = 0; colIndex < keyboardLayout[rowIndex].length; colIndex++) {
+      const key = `${rowIndex}-${colIndex}`;
+      const utterances = utterancePredictionMap[key] || [];
+      if (utterances.length > 0) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   // Render utterance predictions positioned above their starting letters
   const renderPositionedUtterancePredictions = (rowIndex) => {
     const predictions = [];
@@ -135,7 +147,7 @@ const Keyboard = ({
       <div className="keyboard-layout">
         <div className="keyboard-main">
           {/* First row with word and utterance predictions */}
-          <div className="row-container">
+          <div className={`row-container ${hasSentencePredictionsForRow(0) ? 'has-sentence-predictions' : ''}`}>
             {/* Positioned utterance predictions */}
             {renderPositionedUtterancePredictions(0)}
             <div className="prediction-row">
@@ -155,7 +167,7 @@ const Keyboard = ({
           </div>
 
           {/* Second row with word and utterance predictions */}
-          <div className="row-container">
+          <div className={`row-container ${hasSentencePredictionsForRow(1) ? 'has-sentence-predictions' : ''}`}>
             {/* Positioned utterance predictions */}
             {renderPositionedUtterancePredictions(1)}
             <div className="prediction-row">
@@ -175,7 +187,7 @@ const Keyboard = ({
           </div>
 
           {/* Third row with word and utterance predictions */}
-          <div className="row-container">
+          <div className={`row-container ${hasSentencePredictionsForRow(2) ? 'has-sentence-predictions' : ''}`}>
             {/* Positioned utterance predictions */}
             {renderPositionedUtterancePredictions(2)}
             <div className="prediction-row">
