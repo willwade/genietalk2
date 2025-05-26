@@ -19,15 +19,15 @@ export const getAppConfig = () => {
     // In a real implementation, this would dynamically import the package.json
     // However, for simplicity and to avoid build issues, we'll use a global variable
     // that will be set during initialization
-    
-    // If window.__GENIETALK_CONFIG__ exists, use it
-    if (typeof window !== 'undefined' && window.__GENIETALK_CONFIG__) {
+
+    // If window.__JINNIYAH_CONFIG__ exists, use it
+    if (typeof window !== 'undefined' && window.__JINNIYAH_CONFIG__) {
       return {
         ...defaultConfig,
-        ...window.__GENIETALK_CONFIG__
+        ...window.__JINNIYAH_CONFIG__
       };
     }
-    
+
     return defaultConfig;
   } catch (error) {
     console.error('Error loading configuration:', error);

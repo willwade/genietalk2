@@ -1,4 +1,5 @@
-# Sketchy "GenieTalk" Clone App
+# Sketchy "GenieTalk" Clone App - "Jinniyah" 
+
 
 So the Github legend that is Annalu Waller (she has a GitHub coat for crying out loud) has a paper with Per Ola and Tom Griffiths on genieTalk - the output of ACE-LP. Its long awaited. It's cool. I wanted to play with it and couldnt. So I asked a coding agent to make it for me. (NB: Look at the PRD.md thats what it first made from everything it read and saw.. and then went off and did its thing)
 
@@ -9,6 +10,9 @@ See the paper here: https://dl.acm.org/doi/10.1145/3703451 - and more on ACE-LP:
 PPM Model - is Google's: https://github.com/google-research/google-research/tree/master/jslm (Brian Roark et al)
 
 We are also using Keith Vertanens Prediction API which works well: https://api.imagineville.org/docs/ (but is online)
+
+NB: Renaming this to Jinniyah. Jinniyah is a name from the Arabian Nights - and it means "genie" or "spirit". It is also a play on the word "Jinniyah" which is a feminine form of "Jinn" in Arabic. i.e this is GenieTalks little sister.
+
 
 To switch - change the 
 

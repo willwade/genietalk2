@@ -5,6 +5,7 @@
   border-radius: 8px;
   margin: 0;
   padding: 5px 0;
+  overflow: visible; /* Allow predictions to extend beyond keyboard boundaries */
 }
 
 .keyboard-layout {
@@ -17,44 +18,58 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+  overflow: visible; /* Allow predictions to extend beyond main area */
 }
 
 .row-container {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  overflow: visible; /* Allow predictions to extend beyond row container */
+  position: relative; /* Allow absolute positioning of utterance predictions */
 }
 
 .prediction-row {
   display: flex;
   justify-content: center;
   gap: var(--key-spacing);
-  height: 84px; /* Fixed height for 3 lines of predictions */
+  height: 140px; /* Increased height for 5 lines of predictions (28px each) */
   position: relative; /* Allow absolute positioning of children */
+  overflow: visible; /* Allow predictions to extend beyond row boundaries */
   z-index: 5; /* Ensure proper stacking context */
 }
 
 .key-prediction-slot {
   width: var(--key-size);
-  height: 84px; /* Fixed height for 3 lines of predictions (28px each) */
+  height: 140px; /* Increased height for 5 lines of predictions (28px each) */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end; /* Align content to bottom */
+  justify-content: flex-start; /* Align content to top */
   position: relative; /* Allow children to be positioned absolutely */
-  /* Remove overflow: hidden to allow content to extend beyond container */
+  overflow: visible; /* Allow content to extend beyond container boundaries */
+  z-index: 10; /* Ensure predictions appear above other elements */
 }
 
-.key-prediction-container {
+.key-prediction-container { /* For WORD predictions */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
   width: 100%;
-  height: 100%;
-  justify-content: flex-end; /* Align content to bottom */
   padding-bottom: 2px;
   position: relative; /* Allow absolute positioning of children */
+  order: 2; /* Words at the bottom */
+  margin-top: auto; /* Push to bottom in flex-start container */
+  max-height: 28px; /* Space for one line of word predictions */
+  overflow: visible; /* Allow content to extend beyond boundaries */
+  z-index: 20; /* Higher than utterance predictions so they appear on top */
+  transform: translateY(-56px); /* Default position - move to bottom row (row 5) */
+}
+
+/* When sentence predictions are present, move word predictions up further */
+.row-container.has-sentence-predictions .key-prediction-container {
+  transform: translateY(-84px); /* Move word predictions up to make room for 3 layers of sentence predictions */
 }
 
 .prediction {
@@ -78,7 +93,8 @@
   background-color: var(--word-prediction-bg);
   color: var(--key-text);
   border: 1px solid #e6d435;
-  z-index: 5;
+  z-index: 25; /* Higher than sentence predictions to appear on top */
+  position: relative; /* Ensure z-index takes effect */
 }
 
 .utterance-predictions-row {
@@ -97,17 +113,6 @@
   display: none; /* Chrome, Safari, Edge */
 }
 
-.utterance-prediction-container {
-  display: flex;
-  gap: 4px;
-  margin: 0 2px;
-  height: 28px; /* Fixed height to match other prediction elements */
-  align-items: center; /* Center content vertically */
-  position: absolute; /* Position absolutely to break out of container */
-  z-index: 10; /* Ensure it appears above other elements */
-  white-space: nowrap; /* Keep all words on one line */
-}
-
 .utterance-prediction {
   background-color: var(--sentence-prediction-bg);
   color: var(--key-text);
@@ -116,9 +121,46 @@
   height: 24px;
   padding: 2px 8px;
   font-size: var(--prediction-font-size);
-  z-index: 10;
   margin: 0 1px; /* Add small margin between words */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Add shadow for better visibility */
+}
+
+/* Positioned utterance predictions that start above their first letter */
+.positioned-utterance-predictions {
+  position: absolute;
+  left: 0; /* Align with the start of the prediction row */
+  right: 0; /* Full width of the prediction row */
+  height: 28px; /* Fixed height for utterance predictions */
+  overflow: visible;
+  z-index: 10; /* Lower than word predictions so they appear underneath */
+  pointer-events: none; /* Allow clicks to pass through to underlying elements */
+}
+
+/* Layer 1 - closest to keyboard keys */
+.positioned-utterance-predictions.layer-1 {
+  top: 112px; /* Bottom layer */
+}
+
+/* Layer 2 - middle layer */
+.positioned-utterance-predictions.layer-2 {
+  top: 84px; /* Middle layer */
+}
+
+/* Layer 3 - top layer */
+.positioned-utterance-predictions.layer-3 {
+  top: 56px; /* Top layer */
+}
+
+.positioned-utterance-container {
+  position: absolute;
+  top: 0;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  z-index: 10; /* Lower than word predictions so they appear underneath */
+  pointer-events: auto; /* Re-enable clicks for the actual predictions */
 }
 
 .spacebar-row {

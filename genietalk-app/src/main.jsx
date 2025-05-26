@@ -9,10 +9,10 @@ import './styles/index.css';
 import packageJson from '../package.json';
 
 // Set the configuration in a global variable for the config module to access
-window.__GENIETALK_CONFIG__ = packageJson.genietalkConfig || { predictionModel: 'ppm' };
+window.__JINNIYAH_CONFIG__ = packageJson.jinniyahConfig || { predictionModel: 'ppm' };
 
 // Log the configuration
-console.log('GenieTalk configuration:', window.__GENIETALK_CONFIG__);
+console.log('Jinniyah configuration:', window.__JINNIYAH_CONFIG__);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
