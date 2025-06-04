@@ -25,3 +25,10 @@ To switch - change the
 In package.json to "ppm" or "api" - and then run the app.
 
 No Joke - this took around an hour to make. What a crazy time to be alive. 
+
+
+
+https://github.com/user-attachments/assets/754e84e7-1a45-4a32-b718-2ff7eb6315fd
+
+
+
